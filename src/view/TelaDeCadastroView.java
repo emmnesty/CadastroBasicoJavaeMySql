@@ -20,6 +20,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
@@ -34,6 +35,7 @@ public class TelaDeCadastroView extends JFrame {
 	private JPasswordField pfSenha;
 	private JTextField tfBusca;
 	private JTable tbDados;
+	private JButton btnDeletar;
 
 	/**
 	 * Launch the application.
@@ -58,7 +60,7 @@ public class TelaDeCadastroView extends JFrame {
 		setResizable(false);
 		setTitle("Tela de Cadastro");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 342, 552);
+		setBounds(100, 100, 458, 522);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -67,40 +69,42 @@ public class TelaDeCadastroView extends JFrame {
 		JLabel lblId = new JLabel("ID");
 		lblId.setForeground(Color.DARK_GRAY);
 		lblId.setFont(new Font("Arial", Font.BOLD, 14));
-		lblId.setBounds(41, 40, 36, 14);
+		lblId.setBounds(72, 77, 36, 14);
 		contentPane.add(lblId);
 
 		JLabel lblUsuario = new JLabel("Usu\u00E1rio");
 		lblUsuario.setForeground(Color.DARK_GRAY);
 		lblUsuario.setFont(new Font("Arial", Font.BOLD, 14));
-		lblUsuario.setBounds(26, 91, 75, 14);
+		lblUsuario.setBounds(62, 120, 67, 14);
 		contentPane.add(lblUsuario);
 
 		JLabel lblNewLabel_2 = new JLabel("Senha");
 		lblNewLabel_2.setForeground(Color.DARK_GRAY);
 		lblNewLabel_2.setFont(new Font("Arial", Font.BOLD, 14));
-		lblNewLabel_2.setBounds(26, 140, 46, 14);
+		lblNewLabel_2.setBounds(62, 158, 46, 14);
 		contentPane.add(lblNewLabel_2);
 
 		tfId = new JTextField();
 		tfId.setEditable(false);
-		tfId.setBounds(82, 38, 86, 20);
+		tfId.setBounds(118, 75, 86, 20);
 		contentPane.add(tfId);
 		tfId.setColumns(10);
 
 		tfUsuario = new JTextField();
-		tfUsuario.setBounds(82, 89, 190, 20);
+		tfUsuario.setBounds(118, 118, 190, 20);
 		contentPane.add(tfUsuario);
 		tfUsuario.setColumns(10);
 
 		pfSenha = new JPasswordField();
-		pfSenha.setBounds(82, 138, 190, 20);
+		pfSenha.setBounds(118, 156, 190, 20);
 		contentPane.add(pfSenha);
 
 		JPanel panel = new JPanel();
-		panel.setBorder(new TitledBorder(null, "Cadastro", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBackground(Color.GRAY);
-		panel.setBounds(26, 251, 267, 55);
+		panel.setBorder(new TitledBorder(
+				new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)),
+				"Cadastro de Usu\u00E1rio", TitledBorder.RIGHT, TitledBorder.TOP, null, new Color(64, 64, 64)));
+		panel.setBackground(Color.LIGHT_GRAY);
+		panel.setBounds(41, 319, 348, 85);
 		contentPane.add(panel);
 		panel.setLayout(null);
 
@@ -111,10 +115,12 @@ public class TelaDeCadastroView extends JFrame {
 			@SuppressWarnings("deprecation")
 			public void actionPerformed(ActionEvent e) {
 
-				if (tfUsuario.getText().equals("") || pfSenha.getText().equals("")) {
+				if (tfUsuario.getText().equals("") || pfSenha.getText().equals(""))
 					JOptionPane.showMessageDialog(null, "Usuário/Senha em branco!");
+				if (tfUsuario.getText().equals(tfId))
+					JOptionPane.showMessageDialog(null, "Usuário/Senha Existente!");
 
-				} else {
+				else {
 					try {
 						Connection conn = Conexao.con();
 
@@ -128,6 +134,7 @@ public class TelaDeCadastroView extends JFrame {
 						conn.close();
 
 						JOptionPane.showMessageDialog(null, "Usuário Cadastrado!");
+						tfId.setText("");
 						tfUsuario.setText("");
 						pfSenha.setText("");
 
@@ -140,7 +147,7 @@ public class TelaDeCadastroView extends JFrame {
 		});
 		btnSalvar.setForeground(Color.DARK_GRAY);
 		btnSalvar.setFont(new Font("Arial", Font.PLAIN, 12));
-		btnSalvar.setBounds(10, 23, 89, 23);
+		btnSalvar.setBounds(34, 23, 89, 23);
 		panel.add(btnSalvar);
 
 		// LISTAR
@@ -175,18 +182,62 @@ public class TelaDeCadastroView extends JFrame {
 			}
 		});
 		btnListarDados.setForeground(Color.DARK_GRAY);
-		btnListarDados.setBounds(136, 23, 121, 23);
+		btnListarDados.setBounds(187, 23, 126, 23);
 		panel.add(btnListarDados);
 
+		// Atualizar
+
+		JButton btnAtualizar = new JButton("Atualizar Dados");
+		btnAtualizar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				if (tfId.getText().equals("")) {
+					JOptionPane.showMessageDialog(null, "Informe o ID");
+				} else {
+					try {
+						Connection conn = Conexao.con();
+						String sql = "update dados_senhas set usuario=?, senha=? where id =?";
+
+						PreparedStatement stmt = conn.prepareStatement(sql);
+						stmt.setString(1, tfUsuario.getText());
+						stmt.setString(2, pfSenha.getText());
+						stmt.setString(3, tfId.getText());
+
+						stmt.execute();
+						stmt.close();
+						conn.close();
+
+						JOptionPane.showMessageDialog(null, "Dados Atualizados!");
+
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
+				}
+			}
+		});
+
+		btnAtualizar.setForeground(Color.DARK_GRAY);
+		btnAtualizar.setBounds(187, 51, 126, 23);
+		panel.add(btnAtualizar);
+
+		btnDeletar = new JButton("Deletar");
+		btnDeletar.setForeground(Color.DARK_GRAY);
+		btnDeletar.setBounds(34, 51, 89, 23);
+		panel.add(btnDeletar);
+
 		JPanel panel_1 = new JPanel();
-		panel_1.setBorder(new TitledBorder(null, "Pesquisar", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_1.setBackground(Color.GRAY);
-		panel_1.setBounds(26, 317, 267, 51);
+		panel_1.setBorder(new TitledBorder(
+				new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)),
+				"Pesquisar Usu\u00E1rio", TitledBorder.RIGHT, TitledBorder.TOP, null, new Color(64, 64, 64)));
+		panel_1.setBackground(Color.LIGHT_GRAY);
+		panel_1.setBounds(41, 415, 348, 51);
 		contentPane.add(panel_1);
 		panel_1.setLayout(null);
 
 		tfBusca = new JTextField();
-		tfBusca.setBounds(109, 20, 128, 20);
+		tfBusca.setBounds(164, 20, 158, 20);
 		panel_1.add(tfBusca);
 		tfBusca.setColumns(10);
 
@@ -206,8 +257,10 @@ public class TelaDeCadastroView extends JFrame {
 
 						PreparedStatement stmt = conn.prepareStatement(sql);
 
-						stmt.setString(1, "%" + tfBusca.getText());
+						stmt.setString(1, "" + tfBusca.getText());
 						ResultSet rs = stmt.executeQuery();
+						
+							
 
 						while (rs.next()) {
 							tfId.setText(rs.getString("id"));
@@ -227,12 +280,28 @@ public class TelaDeCadastroView extends JFrame {
 			}
 		});
 		btnPesquisar.setForeground(Color.DARK_GRAY);
-		btnPesquisar.setBounds(10, 19, 89, 23);
+		btnPesquisar.setBounds(27, 19, 103, 23);
 		panel_1.add(btnPesquisar);
 
+		JPanel panel_2 = new JPanel();
+		panel_2.setBorder(new TitledBorder(
+				new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)),
+				"Informa\u00E7\u00F5es de Login", TitledBorder.TRAILING, TitledBorder.TOP, null,
+				new Color(64, 64, 64)));
+		panel_2.setBounds(40, 55, 349, 142);
+		contentPane.add(panel_2);
+
+		JPanel panel_3 = new JPanel();
+		panel_3.setBorder(new TitledBorder(
+				new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)),
+				"Informa\u00E7\u00F5es de Pesquisa", TitledBorder.RIGHT, TitledBorder.TOP, null, Color.DARK_GRAY));
+		panel_3.setBounds(41, 197, 349, 123);
+		contentPane.add(panel_3);
+		panel_3.setLayout(null);
+
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(26, 165, 267, 78);
-		contentPane.add(scrollPane);
+		scrollPane.setBounds(21, 22, 318, 89);
+		panel_3.add(scrollPane);
 
 		tbDados = new JTable();
 		tbDados.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "ID", "Usuario", "Senha" }) {
