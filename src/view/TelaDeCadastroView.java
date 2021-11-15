@@ -26,7 +26,6 @@ import javax.swing.table.DefaultTableModel;
 
 import dao.Conexao;
 
-@SuppressWarnings("serial")
 public class TelaDeCadastroView extends JFrame {
 
 	private JPanel contentPane;
@@ -112,7 +111,7 @@ public class TelaDeCadastroView extends JFrame {
 
 		JButton btnSalvar = new JButton("Salvar");
 		btnSalvar.addActionListener(new ActionListener() {
-			@SuppressWarnings("deprecation")
+
 			public void actionPerformed(ActionEvent e) {
 
 				if (tfUsuario.getText().equals("") || pfSenha.getText().equals(""))
@@ -139,7 +138,6 @@ public class TelaDeCadastroView extends JFrame {
 						pfSenha.setText("");
 
 					} catch (SQLException e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 				}
@@ -189,6 +187,7 @@ public class TelaDeCadastroView extends JFrame {
 
 		JButton btnAtualizar = new JButton("Atualizar Dados");
 		btnAtualizar.addActionListener(new ActionListener() {
+			@SuppressWarnings("deprecation")
 			public void actionPerformed(ActionEvent e) {
 
 				if (tfId.getText().equals("")) {
@@ -223,6 +222,36 @@ public class TelaDeCadastroView extends JFrame {
 		panel.add(btnAtualizar);
 
 		btnDeletar = new JButton("Deletar");
+		btnDeletar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				if (tfId.getText().equals("")) {
+					JOptionPane.showMessageDialog(null, "Informe um ID");
+				} else {
+					try {
+						Connection conn = Conexao.con();
+						String sql = "delete from dados_senhas where id=?";
+						PreparedStatement stmt = conn.prepareStatement(sql);
+
+						stmt.setString(1, tfId.getText());
+
+						stmt.execute();
+						stmt.close();
+						conn.close();
+						JOptionPane.showMessageDialog(null, "Excluído com sucesso!");
+						
+						tfId.setText("");
+						tfUsuario.setText("");
+						pfSenha.setText("");
+
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
+				}
+			}
+		});
 		btnDeletar.setForeground(Color.DARK_GRAY);
 		btnDeletar.setBounds(34, 51, 89, 23);
 		panel.add(btnDeletar);
@@ -243,7 +272,7 @@ public class TelaDeCadastroView extends JFrame {
 
 		// QUERY
 
-		JButton btnPesquisar = new JButton("Pesquisar");
+		JButton btnPesquisar = new JButton("Pesquisar por ID");
 		btnPesquisar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (tfBusca.getText().equals("")) {
@@ -259,8 +288,6 @@ public class TelaDeCadastroView extends JFrame {
 
 						stmt.setString(1, "" + tfBusca.getText());
 						ResultSet rs = stmt.executeQuery();
-						
-							
 
 						while (rs.next()) {
 							tfId.setText(rs.getString("id"));
@@ -280,7 +307,7 @@ public class TelaDeCadastroView extends JFrame {
 			}
 		});
 		btnPesquisar.setForeground(Color.DARK_GRAY);
-		btnPesquisar.setBounds(27, 19, 103, 23);
+		btnPesquisar.setBounds(10, 19, 144, 23);
 		panel_1.add(btnPesquisar);
 
 		JPanel panel_2 = new JPanel();
